@@ -1,0 +1,15 @@
+[Unit]
+Description=AWUS1900 Passive Dual-Band Wireless Surveyor
+Documentation=file:///usr/local/share/doc/awus-surveyor/README.md
+After=NetworkManager.service multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/awus-surveyor --country ZA --output-root /var/log/awus-surveyor --no-ui
+Restart=on-failure
+RestartSec=10
+KillSignal=SIGINT
+TimeoutStopSec=45
+
+[Install]
+WantedBy=multi-user.target

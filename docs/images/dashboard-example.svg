@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1460" height="650" viewBox="0 0 1460 650" role="img" aria-labelledby="title desc">
+  <title id="title">AWUS1900 Surveyor terminal dashboard</title>
+  <desc id="desc">Synthetic demonstration output showing passive dual-band wireless inventory data. All SSIDs and BSSIDs are fictitious.</desc>
+  <rect width="1460" height="650" rx="10" fill="#171a21"/>
+  <g font-family="DejaVu Sans Mono, Consolas, monospace" font-size="18" fill="#f2f2f2">
+    <text x="16" y="30">AWUS1900 Surveyor v1.0.1  |  PASSIVE 2.4/5 GHz INVENTORY</text>
+    <text x="16" y="58">==============================================================================================================</text>
+    <text x="16" y="86">Adapter: wlan0  Driver: rtw88_8814au  PHY: phy1  Country: ZA</text>
+    <text x="16" y="114">Runtime: 08:14  Sweeps: 31  Scan OK/Fail: 124/0  Recoveries: 0</text>
+    <text x="16" y="142">Networks: 12  2.4 GHz: 5  5 GHz: 7  Open: 1  WEP: 0  WPS: 3  Hidden: 2</text>
+    <text x="16" y="170">Current scan: 5 GHz channels [36,40,44,48,52,56]</text>
+    <text x="16" y="198">Checkpoint directory: /var/log/awus-surveyor/scan_20260801_140000</text>
+    <text x="16" y="226">--------------------------------------------------------------------------------------------------------------</text>
+    <text x="16" y="254">  RSSI    AVG  BAND     CH  SECURITY                        PMF        WPS  BSSID             SSID / ESSID</text>
+    <text x="16" y="282">--------------------------------------------------------------------------------------------------------------</text>
+    <text x="16" y="310"> -38.0  -39.2  5 GHz    36  WPA2/WPA3-Personal             Required   N    02:00:00:00:00:01  Office-Core-5G</text>
+    <text x="16" y="338"> -42.0  -41.6  2.4 GHz   11  WPA2-Personal                  Capable    N    02:00:00:00:00:02  Office-Core</text>
+    <text x="16" y="366"> -59.0  -60.3  5 GHz    36  WPA2-Personal                  Not adver… Y    02:00:00:00:00:03  Lab-Printer-Direct</text>
+    <text x="16" y="394"> -64.0  -63.1  2.4 GHz    6  Open                           N/A        N    02:00:00:00:00:04  Guest-WiFi</text>
+    <text x="16" y="422"> -68.0  -67.4  2.4 GHz    1  WPA2-Enterprise                Capable    N    02:00:00:00:00:05  Corp-EAP</text>
+    <text x="16" y="450"> -74.0  -72.8  5 GHz   100  WPA2-Personal                  Not adver… Y    02:00:00:00:00:06  Camera-IoT-5G</text>
+    <text x="16" y="478"> -80.0  -79.1  5 GHz    44  WPA2-Personal                  Not adver… N    02:00:00:00:00:07  &lt;hidden&gt;</text>
+    <text x="16" y="506">--------------------------------------------------------------------------------------------------------------</text>
+    <text x="16" y="534">RSSI is received signal at the AWUS1900, not adapter transmit power. Ctrl-C stops cleanly and restores state.</text>
+  </g>
+  <text x="16" y="620" font-family="system-ui, sans-serif" font-size="14" fill="#9aa4b2">Synthetic public demo — no real wireless identifiers are shown.</text>
+</svg>

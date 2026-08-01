@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.log
+*.tmp
+*.swp
+.DS_Store
+awus-surveys/
+dist/
