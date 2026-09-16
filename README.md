@@ -1,5 +1,9 @@
 # AWUS1900 Surveyor v1.0.1
 
+[![CI](https://github.com/KampaiDiscount/awus1900-surveyor/actions/workflows/ci.yml/badge.svg)](https://github.com/KampaiDiscount/awus1900-surveyor/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/KampaiDiscount/awus1900-surveyor)](https://github.com/KampaiDiscount/awus1900-surveyor/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A stable, autonomous wireless-zone/AP inventory tool for an **ALFA AWUS1900** on Kali Linux.
 
 It replaces the repetitive `airmon-ng` → monitor interface → `airodump-ng` workflow for the specific job of discovering nearby access points and retaining clean metadata. The surveyor uses passive kernel scans through `iw`/`nl80211`; it does not need a monitor interface, does not kill NetworkManager globally, and does not capture client payload traffic.
@@ -46,9 +50,47 @@ The program:
 6. Applies per-scan timeouts, retries, stale-cache filtering, scan aborts, interface cycling, and USB reappearance detection.
 7. Atomically checkpoints all reports throughout the run, not only at shutdown.
 8. Handles `Ctrl-C`, `SIGTERM`, and systemd stop cleanly, then restores the original interface and regulatory state.
-9. Leaves a `/run/awus-surveyor-*.state.json` recovery file if the process is killed with `SIGKILL` or the machine loses power. The next launch restores it automatically.
+9. Leaves a `/run/awus-surveyor-*.state.json` recovery file if the process is killed with `SIGKILL`. The next launch attempts restoration while that file remains available. `/run` is normally cleared at reboot, so this file does not provide recovery across power loss.
 
 A single AWUS1900 contains one radio. It therefore cannot listen on 2.4 GHz and 5 GHz at the exact same instant; it sweeps the enabled channels continuously and merges all observations into one inventory.
+
+## Requirements
+
+- Kali Linux with a working AWUS1900 / RTL8814AU driver and USB passthrough if using a VM. The companion [driver deployment project](https://github.com/KampaiDiscount/kali-awus1900-deploy) covers that setup.
+- Python 3, `iw`, and `iproute2`. CI tests Python 3.11, 3.12, and 3.13. The Python program uses the standard library; no `pip` packages are required.
+- Root privileges for hardware scans and a dedicated adapter. Keep internet connectivity on a separate interface.
+- Optional `ieee-data` for local vendor names and NetworkManager's `nmcli` for adapter management when NetworkManager is present.
+
+Install the download and runtime prerequisites on Kali:
+
+```bash
+sudo apt update
+sudo apt install curl python3 iw iproute2
+```
+
+## Download and verify
+
+The [latest release](https://github.com/KampaiDiscount/awus1900-surveyor/releases/latest) contains ZIP and tar archives plus SHA-256 checksums. This example pins the current release so the archive and checksum come from the same version:
+
+```bash
+version=1.0.1
+base="https://github.com/KampaiDiscount/awus1900-surveyor/releases/download/v${version}"
+curl -fLO "$base/awus1900-surveyor-v${version}.tar.gz"
+curl -fLO "$base/awus1900-surveyor-v${version}.sha256"
+grep "  awus1900-surveyor-v${version}.tar.gz$" "awus1900-surveyor-v${version}.sha256" | sha256sum --check --strict -
+tar -xzf "awus1900-surveyor-v${version}.tar.gz"
+cd "awus1900-surveyor-v${version}"
+sha256sum --check --strict MANIFEST.txt
+```
+
+Continue only if both checksum checks succeed. The filtered first check verifies the tar archive without requiring the ZIP download. `MANIFEST.txt` verifies files inside the release archive.
+
+For the current development documentation and source, clone the repository instead:
+
+```bash
+git clone https://github.com/KampaiDiscount/awus1900-surveyor.git
+cd awus1900-surveyor
+```
 
 ## Fast start
 
@@ -64,6 +106,8 @@ The supplied launcher temporarily uses the South African regulatory domain:
 ```bash
 sudo ./awus_surveyor.py --country ZA
 ```
+
+Use the country where the adapter is physically operating. To retain the current regulatory domain, run `sudo python3 ./awus_surveyor.py` directly without `--country`.
 
 Press `Ctrl-C` once. The program finalizes the files and restores the adapter.
 
@@ -174,9 +218,29 @@ awus-survey
 
 The installer copies the systemd unit but deliberately does **not** enable it.
 
+To update, download and verify a newer release, stop any running survey, and rerun `sudo ./install.sh` from that release directory. Existing survey output is retained.
+
+To remove the installed executables, documentation, and service:
+
+```bash
+sudo bash ./uninstall.sh
+```
+
+Uninstalling stops/disables the service and leaves survey results intact.
+
 ## Optional autonomous systemd service
 
 Enable only when the AWUS1900 is a dedicated survey adapter:
+
+The supplied unit also uses `--country ZA`. Before enabling it outside South Africa, create an override with `sudo systemctl edit awus-surveyor.service` and replace `CC` with the operating country's two-letter code:
+
+```ini
+[Service]
+ExecStart=
+ExecStart=/usr/local/sbin/awus-surveyor --country CC --output-root /var/log/awus-surveyor --no-ui
+```
+
+Then enable the service:
 
 ```bash
 sudo systemctl enable --now awus-surveyor.service
@@ -264,13 +328,13 @@ nmcli device status
 ps aux | grep -E 'airodump|hcxdumptool|wpa_supplicant' | grep -v grep
 ```
 
-### Adapter left unmanaged after a power loss or `kill -9`
+### Adapter left unmanaged after `kill -9`
 
 ```bash
 sudo ./awus_surveyor.py --restore-only
 ```
 
-The next normal launch also attempts stale-state restoration automatically.
+The next normal launch also attempts stale-state restoration automatically. This requires the recovery file in `/run` to remain available; after a reboot or power loss, inspect the interface and NetworkManager state directly because `/run` is normally cleared.
 
 ### Wrong interface selected
 
@@ -313,7 +377,13 @@ Build release archives and checksums:
 ./scripts/package-release.sh
 ```
 
-The repository includes GitHub Actions CI for Python 3.11, 3.12, and 3.13. See [Contributing](CONTRIBUTING.md), [Security policy](SECURITY.md), and [v1.0.1 release notes](RELEASE_NOTES_v1.0.1.md).
+The repository includes GitHub Actions CI for Python 3.11, 3.12, and 3.13. These checks cover parsing, report generation, orchestration, and shell syntax; they do not certify a particular adapter, USB path, kernel, or RF environment. See [Contributing](CONTRIBUTING.md), [Security policy](SECURITY.md), [Changelog](CHANGELOG.md), and [v1.0.1 release notes](RELEASE_NOTES_v1.0.1.md).
+
+The release builder regenerates `MANIFEST.txt` inside each archive. Run it from a clean checkout: it copies local files other than its documented output/cache exclusions.
+
+## License and support
+
+Released under the [MIT License](LICENSE). Report reproducible bugs through [GitHub issues](https://github.com/KampaiDiscount/awus1900-surveyor/issues), with the environment and sanitized evidence described in [Contributing](CONTRIBUTING.md).
 
 ## Scope
 

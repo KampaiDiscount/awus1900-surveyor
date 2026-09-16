@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Added release download, checksum verification, prerequisites, update, and uninstall instructions.
+- Clarified service regulatory-domain configuration and recovery-file limits after reboot or power loss.
+- Added project status links and distinguished automated tests from hardware validation.
+
 ## 1.0.1 — 2026-08-01
 
 - Clarified that dashboard RSSI is received signal at the AWUS1900, not adapter transmit power.
